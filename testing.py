@@ -5,14 +5,16 @@ from GoFGame import GoFGame
 import gameLogic
 
 
-itr = 10
+itr = 100
 max_turns = 1000
+
+start_time = time.time()
+total_turns = 0
 
 env = GoFGame()
 
-start_time = time.time()
+print(f"simulating { itr } random games")
 
-total_turns = 0
 for i in range(itr):
     env.reset()
 

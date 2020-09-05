@@ -1,0 +1,1 @@
+NN_INPUT_SIZE = 512

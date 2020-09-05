@@ -4,6 +4,7 @@ import numpy as np
 from cards import CARDS
 import gameLogic
 import enumerateOptions
+import network
 
 
 class GoFGame():
@@ -190,6 +191,29 @@ class GoFGame():
         """
 
         return self.player_cards[self.player_to_act]
+
+
+    def fillNNInput(self):
+        """
+        returns the input array for the network for the current player
+        """
+
+        # create input array
+        nn_input = np.zeros(network.NN_INPUT_SIZE)
+
+        # fill card in hand
+
+
+        # fill for each opponent
+
+        
+        # fill previous hand info
+
+
+        # fill cards played
+
+
+        return nn_input
 
 
     def gameOver(self):
