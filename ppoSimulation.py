@@ -1,9 +1,11 @@
 import numpy as np
-from ppoNetwork import PPONetwork, PPOModel
-from vectorGame import vectorizedGoFGames
 import tensorflow as tf
 import joblib
 import copy
+
+from ppoNetwork import PPONetwork, PPOModel
+from vectorGame import vectorizedGoFGames
+import network
 
 
 #taken directly from baselines implementation - reshape minibatch in preparation for training.
@@ -17,11 +19,11 @@ def sf01(arr):
 
 
 class gofPPOSimulation(object):
-    def __init__(self, sess, *, inpDim = 412, nGames = 8, nSteps = 20, nMiniBatches = 4, nOptEpochs = 5, lam = 0.95, gamma = 0.995, ent_coef = 0.01, vf_coef = 0.5, max_grad_norm = 0.5, minLearningRate = 0.000001, learningRate, clipRange, saveEvery = 500):
+    def __init__(self, sess, *, inpDim = network.NN_INPUT_SIZE, nGames = 8, nSteps = 20, nMiniBatches = 4, nOptEpochs = 5, lam = 0.95, gamma = 0.995, ent_coef = 0.01, vf_coef = 0.5, max_grad_norm = 0.5, minLearningRate = 0.000001, learningRate, clipRange, saveEvery = 100):
         
         #network/model for training
-        self.trainingNetwork = PPONetwork(sess, inpDim, 1695, "trainNet")
-        self.trainingModel = PPOModel(sess, self.trainingNetwork, inpDim, 1695, ent_coef, vf_coef, max_grad_norm)
+        self.trainingNetwork = PPONetwork(sess, inpDim, network.ACTIONS_SIZE, "trainNet")
+        self.trainingModel = PPOModel(sess, self.trainingNetwork, inpDim, network.ACTIONS_SIZE, ent_coef, vf_coef, max_grad_norm)
         
         #player networks which choose decisions - allowing for later on experimenting with playing against older versions of the network (so decisions they make are not trained on).
         self.playerNetworks = {}
@@ -114,7 +116,7 @@ class gofPPOSimulation(object):
                     mb_dones[-4][i] = True
                     self.epInfos.append(infos[i])
                     self.gamesDone += 1
-                    print("Game %d finished. Lasted %d turns" % (self.gamesDone, infos[i]['numTurns']))
+                    print("Game %d finished. Lasted %d turns" % (self.gamesDone, infos[i]['num_turns']))
         self.prevObs = mb_obs[endLength:]
         self.prevGos = mb_pGos[endLength:]
         self.prevRewards = mb_rewards[endLength:]

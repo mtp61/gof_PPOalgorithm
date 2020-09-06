@@ -1,6 +1,11 @@
 import socketio
 import copy
 import json
+import tensorflow as tf
+import joblib
+
+from network import NN_INPUT_SIZE, ACTIONS_SIZE
+from ppoNetwork import PPONetwork
 
 
 # constants
@@ -25,6 +30,13 @@ class Client:
         # connect to game and ready up
         self.sio.emit('game_connection', (self.game_name, self.username))
         self.sendMessage("!ready")
+
+        # make the network
+        sess = tf.Session()
+        self.network = PPONetwork(sess, NN_INPUT_SIZE, ACTIONS_SIZE, self.username)
+        tf.global_variables_initializer().run(session=sess)
+        params = joblib.load(PARAMS_PATH + PARAMS_NAME)
+        self.network.loadParams(params)
 
         # setup variables
         self.old_game_state = None
@@ -55,14 +67,23 @@ class Client:
 
                 # check if we have an action todo add timer to not double respond
                 if game_state['to_play'] == self.username:
+                    # make the nn input
+                    #hand = game_state['player_cards'][self.username]
+                    
+                    # get the nn output
+
+                    # send message to server
+
                     pass
+
+                    
 
         
                         
     
 
     
-
+    
     def numToCardStr(self, num):
         card_str = str(num // 10)
         if num % 10 == 0:
@@ -75,7 +96,7 @@ class Client:
             card_str += 'm'
         return card_str
 
-
+    
     def cardToNum(self, card):  # converts a card json object to the single number used by the engine
         card_num = 10 * int(card['value'])
         if card['color'] == 'y':
@@ -85,7 +106,6 @@ class Client:
         elif card['color'] == 'm':
             card_num += 3
         return card_num
-
 
 
     def sendMessage(self, message):

@@ -13,6 +13,14 @@ total_turns = 0
 
 env = GoFGame()
 
+
+players_go, current_state, currently_available_actions = env.getCurrentState()
+
+print(len(current_state))
+print(len(currently_available_actions))
+
+
+"""
 print(f"simulating { itr } random games")
 
 for i in range(itr):
@@ -44,3 +52,4 @@ for i in range(itr):
     print(f"game { i + 1 } finished")
 
 print(f"{ itr } games, { round(itr / (time.time() - start_time) * 60) } games per min, { round(total_turns / itr) } average turns")
+"""

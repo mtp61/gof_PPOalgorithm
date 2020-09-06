@@ -48,9 +48,15 @@ class GoFGame():
         convert from (1,0,0,1,1...) to (0, -math.inf, -math.inf, 0,0...) etc
         """
         
-        availAcs[np.nonzero(availAcs==0)] = -math.inf
-        availAcs[np.nonzero(availAcs==1)] = 0
-        return availAcs
+        output = np.zeros(len(availAcs))
+
+        for i, a in enumerate(availAcs):
+            if a == 1:
+                output[i] = 0
+            else:
+                output[i] = -math.inf
+        
+        return output
 
 
     def getCurrentState(self):
@@ -280,7 +286,7 @@ class GoFGame():
                 is_flush = True
                 hand_color = gameLogic.getColor(self.current_hand[-1])
                 for card in self.current_hand[:-1]:
-                    if gameLogic.getColor(card) != handColor:
+                    if gameLogic.getColor(card) != hand_color:
                         is_flush = False
                         break
                 if is_flush and gameLogic.getValue(self.current_hand[-1]) == 11:
@@ -345,13 +351,17 @@ class GoFGame():
     
 
     def getReward(self):
-        reward = {}
+        reward = np.zeros(4)
         for i in range(1, 5):
             c = 0
             for card in self.player_cards[i]:
                 if card != 0:
                     c += 1
-            reward[i] = c
+            reward[i - 1] = -c
+        for n, r in enumerate(reward):
+            if r == 0:
+                reward[n] = -np.sum(reward)
+                break
         return reward
 
 

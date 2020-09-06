@@ -3,8 +3,8 @@ import numpy as np
 from baselines.a2c.utils import fc
 import joblib
 
-
 class PPONetwork(object):
+    
     def __init__(self, sess, obs_dim, act_dim, name):
         self.obs_dim = obs_dim
         self.act_dim = act_dim
@@ -68,10 +68,12 @@ class PPONetwork(object):
             modelParams = sess.run(self.params)
             joblib.dump(modelParams, path)
             
-        self.saveParams = saveParams     
+        self.saveParams = saveParams
+     
         
         
 class PPOModel(object):
+    
     def __init__(self, sess, network, inpDim, actDim, ent_coef, vf_coef, max_grad_norm):
         
         self.network = network
