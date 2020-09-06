@@ -1,7 +1,8 @@
 import random
 import numpy as np
+import math
 
-from cards import CARDS
+from cards import CARDS, CARDS_UNIQUE
 import gameLogic
 import enumerateOptions
 import network
@@ -37,7 +38,19 @@ class GoFGame():
         self.num_turns = 0
 
         # vars for making the nn inputs
-        #self.cardsPlayed = np.zeros((4, 64), dtype=int)
+        self.cards_played = {}
+        for card in CARDS_UNIQUE:
+            self.cards_played[card] = 0
+
+
+    def convertAvailableActions(self, availAcs):
+        """
+        convert from (1,0,0,1,1...) to (0, -math.inf, -math.inf, 0,0...) etc
+        """
+        
+        availAcs[np.nonzero(availAcs==0)] = -math.inf
+        availAcs[np.nonzero(availAcs==1)] = 0
+        return availAcs
 
 
     def getCurrentState(self):
@@ -45,7 +58,15 @@ class GoFGame():
         returns players_go, current_state, currently_available_actions
         """
         
-        return self.player_to_act, self.playerGameState(), self.availableActions()
+        return self.player_to_act, self.fillNNInput(), self.convertAvailableActions(self.availableActions())
+
+
+    def getGameState(self):
+        """
+        human readable (non nn input) version of getCurrentState()
+        """
+
+        return self.player_to_act, self.player_cards[self.player_to_act], self.availableActions()
 
 
     def step(self, action):
@@ -60,6 +81,10 @@ class GoFGame():
             hand.append(self.player_cards[self.player_to_act][card_index])
             self.player_cards[self.player_to_act][card_index] = 0
 
+        # update cards played
+        for card in hand:
+            self.cards_played[card] += 1
+            
         # update current hand
         if action != 0:
             self.current_hand = hand
@@ -185,14 +210,6 @@ class GoFGame():
                         break
 
 
-    def playerGameState(self):
-        """
-        returns the game state for the current player
-        """
-
-        return self.player_cards[self.player_to_act]
-
-
     def fillNNInput(self):
         """
         returns the input array for the network for the current player
@@ -202,16 +219,99 @@ class GoFGame():
         nn_input = np.zeros(network.NN_INPUT_SIZE)
 
         # fill card in hand
-
+        for n, card in enumerate(self.player_cards[self.player_to_act]):
+            card_value = gameLogic.getValue(card)
+            card_color = gameLogic.getColor(card)
+            
+            offset = n * network.EACH_CARD_SIZE
+            nn_input[offset + card_value] = 1
+            if card_value != 0:
+                nn_input[offset + 12 + card_color] = 1
 
         # fill for each opponent
+        current_player = self.player_to_act
+        for n in range(3):
+            current_player = self.nextPlayer(current_player)
+            num_cards = 0
+            for card in self.player_cards[current_player]:
+                if card != 0:
+                    num_cards += 1
+            
+            offset = network.CARD_SIZE + n * network.EACH_PLAYER_SIZE
+            nn_input[offset + num_cards - 1] = 1
 
-        
         # fill previous hand info
+        # control/num passes
+        offset = network.CARD_SIZE + network.PLAYER_SIZE
+        ch_len = len(self.current_hand)
+        if ch_len == 0:
+            nn_input[offset] = 1
+        if self.num_passes == 1:
+            nn_input[offset + 1] = 1
+        elif self.num_passes == 2:
+            nn_input[offset + 2] = 1
+        elif self.num_passes == 3:
+            nn_input[offset + 3] = 1
+        if ch_len != 0:
+            offset = network.CARD_SIZE + network.PLAYER_SIZE + 4
+            
+            # highest card val
+            high_card_val = gameLogic.getValue(self.current_hand[-1])
+            # highest card color
+            high_card_color = gameLogic.getColor(self.current_hand[-1])
+            
+            nn_input[offset + high_card_val - 1] = 1
+            nn_input[offset + 11 + high_card_color] = 1
 
+            offset += 11 + 4
+
+            if ch_len < 5:  # not 5 card
+                hand_type = ch_len - 1
+            else:  # 5 card hand
+                is_straight = True
+                start_value = gameLogic.getValue(self.current_hand[0])
+                for n, card in enumerate(self.current_hand[1:]):
+                    if gameLogic.getValue(card) != start_value + n + 1:
+                        is_straight = False
+                        break
+                if is_straight and gameLogic.getValue(self.current_hand[-1]) == 11:
+                    is_straight = False
+
+                is_flush = True
+                hand_color = gameLogic.getColor(self.current_hand[-1])
+                for card in self.current_hand[:-1]:
+                    if gameLogic.getColor(card) != handColor:
+                        is_flush = False
+                        break
+                if is_flush and gameLogic.getValue(self.current_hand[-1]) == 11:
+                    is_flush = False
+                
+                if is_straight and is_flush:  # straight flush
+                    hand_type = 7
+                elif is_straight:  # straight
+                    hand_type = 4
+                elif is_flush:  # flush
+                    hand_type = 5
+                else:  # full house
+                    hand_type = 6
+
+            nn_input[offset + hand_type] = 1
 
         # fill cards played
-
+        # 10s
+        for color in [0, 1, 2]:
+            offset = network.CARD_SIZE + network.PLAYER_SIZE + network.CURRENT_HAND_SIZE + 2 * color
+            card = 100 + color
+            if self.cards_played[card] >= 1:
+                nn_input[offset] = 1
+                if self.cards_played[card] == 2:
+                    nn_input[offset + 1] = 1
+        # 11s
+        for color in [0, 1, 2]:
+            offset = network.CARD_SIZE + network.PLAYER_SIZE + network.CURRENT_HAND_SIZE + 6 + color
+            card = 110 + color
+            if self.cards_played[card] == 1:
+                nn_input[offset] = 1
 
         return nn_input
 
