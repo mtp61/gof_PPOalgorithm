@@ -4,20 +4,19 @@
     - multicolored 1 (1)
 
 
-architecture for the input of the gang network (512 inputs total)
-    - Each card in hand (16 * (11 + 4 + 8) = 368)
-        - value -- 1-11 (11)
+architecture for the input of the gang network
+    - Each card in hand (16 * (12 + 4) = 256)
+        - value -- 0-11 (12) - zero is for doesnt exist
         - color g/y/r/m (4)
-        - in pair, in triple, in four, in five, in six, in seven, in straight, in flush (8)
-    - Each opponenet (3 * (16 + 9 + 10) = 105)
+    - Each opponenet (3 * (16) = 48)
         - number of cards left 1-16 (16)
-        - has played 11/10 r/y/g (9)
-        - has played pair/triple/straight/flush/full house/straight flush/gang of 4/gang of 5/gang of 6/gang of 7 (10)
-    - previous hand info (11 + 4 + 11 + 4 = 30)
+    - previous hand info (4 + 11 + 4 + 8 = 27)
+        - control/no passes/one pass/two passes (4)
         - highest value 1-11 (11)
         - highest color r/y/g/m (4)
-        - single/pair/triple/gang of 4/gang of 5/gang of 6/gang of 7/straight/flush/full house/straight flush (11)
-        - control/no passes/one pass/two passes (4)
+        - single/pair/triple/gang of 4/straight/flush/full house/straight flush (8)
     - cards played (3 + 6 = 9)
         - 11 r/y/g (3)
         - 10 r/y/g (6)
+
+256 + 48 + 27 + 9 = 340 inputs total

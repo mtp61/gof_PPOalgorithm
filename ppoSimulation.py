@@ -1,6 +1,6 @@
 import numpy as np
 from ppoNetwork import PPONetwork, PPOModel
-from GoFGame import vectorizedGoFGames
+from vectorGame import vectorizedGoFGames
 import tensorflow as tf
 import joblib
 import copy
