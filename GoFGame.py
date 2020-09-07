@@ -64,7 +64,7 @@ class GoFGame():
         returns players_go, current_state, currently_available_actions
         """
         
-        return self.player_to_act, self.fillNNInput(), self.convertAvailableActions(self.availableActions())
+        return self.player_to_act, self.fillNNInput().reshape(1, network.NN_INPUT_SIZE), self.convertAvailableActions(self.availableActions()).reshape(1, network.ACTIONS_SIZE)
 
 
     def getGameState(self):

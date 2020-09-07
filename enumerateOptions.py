@@ -3,7 +3,6 @@ import pickle
 import gameLogic
 
 
-
 with open('actions.pkl','rb') as file:
     card_lookup, index_lookup = pickle.load(file)
 
@@ -22,10 +21,6 @@ for i in index_lookup.keys():
     for c in index_lookup[i].keys():
         index_lookup_all[c] = counter
         counter += 1
-
-
-
-
 
 
 def legalHands(player_cards):
