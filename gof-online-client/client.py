@@ -4,7 +4,6 @@ import json
 import tensorflow as tf
 import joblib
 import numpy as np
-from signal import signal, SIGINT
 
 import sys
 sys.path.append('..')
@@ -33,10 +32,7 @@ maxGradNorm = 0.5
 
 
 class Client:
-    def main(self):
-        # set up kill function
-        signal(SIGINT, self.kill)
-        
+    def main(self):        
         # args
         self.username = USERNAME_DEFAULT
         self.game_name = GAME_NAME_DEFAULT
@@ -136,7 +132,16 @@ class Client:
                     gofGame.current_hand = current_hand
                     
                     # give the other players the correct number of cards
-                    #TODO
+                    current_player_index = game_state['players'].index(self.username)
+                    for p in range(3):
+                        current_player_index = (current_player_index + 1) % 4
+                        name = game_state['players'][current_player_index]
+                        num_cards = game_state['num_cards'][name]
+                        player_cards = [10, 11, 12, 13, 20, 21, 22, 30, 31, 32, 40, 41, 42, 50, 51, 52][:num_cards]
+                        for _ in range(16 - num_cards):
+                            player_cards.append(0)
+                        assert len(player_cards) == 16
+                        gofGame.player_cards[p + 2] = player_cards
 
                     gofGame.initializeActions()
                     go, state, actions = gofGame.getCurrentState()
@@ -207,17 +212,6 @@ class Client:
     def sendMessage(self, message):
         self.sio.emit('chat-message', (self.game_name, self.username, message))
     
-
-    def kill(self, signal_received, frame):
-        # disconnect from the server
-        self.sio.disconnect()
-
-        # print that program was hard killed
-        print('Program killed')
-
-        # kill the program
-        sys.exit()
-
 
 if __name__ == '__main__':
     # instantiate the client class
