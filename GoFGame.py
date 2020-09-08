@@ -352,6 +352,16 @@ class GoFGame():
 
     def getReward(self):
         reward = np.zeros(4)
+        
+        for i in range(1, 5):
+            r = 1
+            for card in self.player_cards[i]:
+                if card != 0:
+                    r = 0
+                    break
+            reward[i - 1] = r
+
+        """
         for i in range(1, 5):
             c = 0
             for card in self.player_cards[i]:
@@ -362,6 +372,8 @@ class GoFGame():
             if r == 0:
                 reward[n] = -np.sum(reward)
                 break
+        """
+
         return reward
 
 

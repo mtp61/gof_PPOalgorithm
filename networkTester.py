@@ -4,6 +4,7 @@ import numpy as np
 import random
 import time
 import scipy.stats
+from sys import argv
 
 from network import NN_INPUT_SIZE, ACTIONS_SIZE
 from GoFGame import GoFGame
@@ -11,13 +12,20 @@ from ppoNetwork import PPONetwork, PPOModel
 
 
 # constants
-TRIALS = 1000
+TRIALS = 250
 
 entCoef = 0.01
 valCoef = 0.5
 maxGradNorm = 0.5
 
-PARAMS_NAME = "modelParameters0"
+PARAMS_NAME_DEFAULT = "modelParameters18000"
+
+
+# get params name from argv
+if len(argv) == 1:
+    params_name = PARAMS_NAME_DEFAULT
+else:
+    params_name = "modelParameters" + argv[1]
 
 # load network
 sess = tf.Session()
@@ -27,10 +35,11 @@ model = PPOModel(sess, network, NN_INPUT_SIZE, ACTIONS_SIZE, entCoef, valCoef, m
 
 tf.global_variables_initializer().run(session=sess)
 
-params = joblib.load("modelParameters/" + PARAMS_NAME)
+params = joblib.load("modelParameters/" + params_name)
+#print(params[0][0][0:5])
 network.loadParams(params)
 
-print(f"\nNetwork { PARAMS_NAME } loaded")
+print(f"\nNetwork { params_name } loaded")
 
 # make a game
 game = GoFGame()
@@ -88,6 +97,7 @@ def mean_confidence_interval(data, confidence=0.95):
 n_mean, n_low, n_high = mean_confidence_interval(network_reward)
 r_mean, r_low, r_high = mean_confidence_interval(random_reward)
 
+print(f"\nNetwork { params_name }")
 print(f"mean, 95% confidence intervals")
 print(f"network reward: { round(n_mean, 2) }, [{ round(n_low, 2) } - { round(n_high, 2) }]")
-print(f"random reward: { round(r_mean, 2) }, [{ round(r_low, 2) } - { round(r_high, 2) }]")
+#print(f"random reward: { round(r_mean, 2) }, [{ round(r_low, 2) } - { round(r_high, 2) }]")

@@ -1,3 +1,26 @@
+Network testing results vs random with 250 trials
+num     reward
+0       0
+10      1.96
+20      3.06
+30      3.53
+40      3.24
+50      4.23
+100     3.99
+150     4.28
+200     4.45
+250     4.67
+300     4.42
+350     4.78
+400     4.8
+450     4.43
+500     4.75
+1000    5.27
+5000    5.04
+10000   5.39
+25000   5.54
+
+
 64 cards total
     - 2 each of 1-10, green/yellow/red (60)
     - green/yellow pheonix, dragon (3)
@@ -18,5 +41,6 @@ architecture for the input of the gang network
     - cards played (3 + 6 = 9)
         - 11 r/y/g (3)
         - 10 r/y/g (6)
+    - each opponent has played (3 * 64 = )
 
 256 + 48 + 27 + 9 = 340 inputs total
