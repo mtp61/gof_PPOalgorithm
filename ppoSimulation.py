@@ -149,13 +149,20 @@ class gofPPOSimulation(object):
         
         return map(sf01, (mb_obs, mb_availAcs, mb_returns, mb_actions, mb_values, mb_neglogpacs))
         
-    def train(self, nTotalSteps):
+    def train(self, nTotalSteps, start_update = 0):
+        if start_update != 0:
+            # load current network
+            params = joblib.load(f"modelParameters/modelParameters{ start_update }")
+            self.trainingNetwork.loadParams(params)
+
+            self.playerNetworks = {}
+            self.playerNetworks[1] = self.playerNetworks[2] = self.playerNetworks[3] = self.playerNetworks[4] = self.trainingNetwork
+
 
         nUpdates = nTotalSteps // (self.nGames * self.nSteps)
         
-        for update in range(nUpdates):
-            
-            alpha = 1.0 - update/nUpdates
+        for update in range(nUpdates - start_update):
+            alpha = 1.0 #- update/nUpdates
             lrnow = self.learningRate * alpha
             if lrnow < self.minLearningRate:
                 lrnow = self.minLearningRate
@@ -191,18 +198,19 @@ class gofPPOSimulation(object):
                 self.trainingNetwork.loadParams(currParams)
             
             if update % self.saveEvery == 0:
-                name = "modelParameters" + str(update)
+                name = "modelParameters" + str(update + start_update)
                 self.trainingNetwork.saveParams("modelParameters/" + name)
                 joblib.dump(self.losses,"modelParameters/losses.pkl")
                 joblib.dump(self.epInfos, "modelParameters/epInfos.pkl")
+                print(f"saved params, { update + start_update } / { nUpdates }")
 
     
 if __name__ == "__main__":
     import time
     
     with tf.Session() as sess:
-        mainSim = gofPPOSimulation(sess, nGames=64, nSteps=20, learningRate = 0.00025, clipRange = 0.2)
+        mainSim = gofPPOSimulation(sess, nGames=8, nSteps=20, learningRate = 0.00025, clipRange = 0.2, saveEvery=500)
         start = time.time()
-        mainSim.train(1000000000)
+        mainSim.train(1000000000, 4500)
         end = time.time()
         print("Time Taken: %f" % (end-start))
