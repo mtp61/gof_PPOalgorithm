@@ -17,7 +17,7 @@ import enumerateOptions
 
 # constants
 PARAMS_PATH = "../modelParameters/"
-PARAMS_NAME = "modelParameters0"
+PARAMS_NAME = "modelParameters27000"
 
 USERNAME_DEFAULT = "ppo_bot"
 GAME_NAME_DEFAULT = "test"
@@ -34,8 +34,12 @@ maxGradNorm = 0.5
 class Client:
     def main(self):        
         # args
-        self.username = USERNAME_DEFAULT
-        self.game_name = GAME_NAME_DEFAULT
+        if len(sys.argv) == 1:
+            self.game_name = GAME_NAME_DEFAULT
+            self.username = USERNAME_DEFAULT
+        else:
+            self.game_name = sys.argv[1]
+            self.username = sys.argv[2]
 
         # connect to the server
         self.sio = socketio.Client()
@@ -134,6 +138,9 @@ class Client:
                     # give the other players the correct number of cards
                     current_player_index = game_state['players'].index(self.username)
                     for p in range(3):
+                        if p + 1 >= len(game_state['players']):  # support for fewer than 4 players
+                            break
+
                         current_player_index = (current_player_index + 1) % 4
                         name = game_state['players'][current_player_index]
                         num_cards = game_state['num_cards'][name]

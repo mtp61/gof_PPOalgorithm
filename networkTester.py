@@ -11,7 +11,7 @@ from ppoNetwork import PPONetwork, PPOModel
 
 
 # constants
-TRIALS = 1000
+TRIALS = 10000
 
 entCoef = 0.01
 valCoef = 0.5

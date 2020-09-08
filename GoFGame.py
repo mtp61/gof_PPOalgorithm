@@ -140,7 +140,7 @@ class GoFGame():
         num_c = 0
         for card in self.player_cards[self.nextPlayer(self.player_to_act)]:
             if card != 0:
-                num_c != 1
+                num_c += 1
         
         # check if we need to play the highest single
         current_hand_len = len(self.current_hand)
