@@ -99,5 +99,5 @@ r_mean, r_low, r_high = mean_confidence_interval(random_reward)
 
 print(f"\nNetwork { params_name }")
 print(f"mean, 95% confidence intervals")
-print(f"network reward: { round(n_mean, 2) }, [{ round(n_low, 2) } - { round(n_high, 2) }]")
+print(f"network reward: { round(n_mean, 4) }, [{ round(n_low, 4) } - { round(n_high, 4) }]")
 #print(f"random reward: { round(r_mean, 2) }, [{ round(r_low, 2) } - { round(r_high, 2) }]")
