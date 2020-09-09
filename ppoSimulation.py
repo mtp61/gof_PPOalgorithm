@@ -211,6 +211,6 @@ if __name__ == "__main__":
     with tf.Session() as sess:
         mainSim = gofPPOSimulation(sess, nGames=8, nSteps=20, learningRate = 0.00025, clipRange = 0.2, saveEvery=500)
         start = time.time()
-        mainSim.train(1000000000, 500)
+        mainSim.train(1000000000, 43500)
         end = time.time()
         print("Time Taken: %f" % (end-start))

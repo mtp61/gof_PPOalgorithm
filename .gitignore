@@ -8,6 +8,7 @@ info
 
 modelParameters/
 modelParameters-old/
+modelParameters-winOnly/
 
 testing.py
 testing2.py
